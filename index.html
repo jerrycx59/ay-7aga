@@ -38,7 +38,7 @@ button{font:inherit;color:var(--text);border:1px solid var(--line);background:rg
 .section{margin-top:25px}.section-title{display:flex;align-items:end;justify-content:space-between;margin-bottom:12px}.section-title h3{margin:0;font-size:19px}.section-title span{color:var(--muted);font-size:12px}
 .today{display:grid;grid-template-columns:1.2fr 1fr;gap:15px}.panel{border:1px solid var(--line);border-radius:25px;background:var(--panel);padding:22px;backdrop-filter:blur(16px)}
 .date{font-size:12px;color:var(--muted)}.bigdate{font-size:28px;font-weight:800;margin:4px 0 18px}
-.prayers{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}.prayer{padding:15px 8px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.025);text-align:center;transition:.25s}
+.prayers{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}.prayer{padding:15px 8px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.025);text-align:center;transition:.25s;cursor:pointer}
 .prayer.done{border-color:rgba(67,211,158,.5);background:rgba(67,211,158,.09);transform:translateY(-3px)}
 .prayer .icon{font-size:21px}.prayer b{display:block;font-size:13px;margin:5px 0}.prayer small{color:var(--muted);font-size:9px}
 .prayer input{display:none}.check{width:22px;height:22px;margin:auto;border-radius:50%;border:1px solid #536078;display:grid;place-items:center;font-size:12px}
@@ -51,6 +51,9 @@ button{font:inherit;color:var(--text);border:1px solid var(--line);background:rg
 .history{display:flex;flex-direction:column;gap:9px}.row{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025)}
 .badge{padding:4px 9px;border-radius:99px;background:rgba(67,211,158,.1);color:var(--green);font-size:10px}
 .empty{color:var(--muted);text-align:center;padding:30px}
+
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;margin-top:14px}.cal-head{color:var(--muted);font-size:10px;text-align:center;padding:5px}.cal-day{min-height:66px;padding:7px;border-radius:13px;border:1px solid var(--line);background:rgba(255,255,255,.025);cursor:pointer;text-align:right;transition:.2s;position:relative}.cal-day:hover{transform:translateY(-2px);background:rgba(255,255,255,.06)}.cal-day.selected{border-color:var(--gold);box-shadow:0 0 0 1px rgba(217,180,90,.15),0 0 20px rgba(217,180,90,.08)}.cal-day.outside{opacity:.3}.cal-day .num{font-weight:800;font-size:12px}.cal-day .dots{display:flex;gap:3px;flex-wrap:wrap;margin-top:7px}.cal-day .dot{width:5px;height:5px;border-radius:50%;background:#39455b}.cal-day .dot.done{background:var(--green);box-shadow:0 0 7px rgba(67,211,158,.35)}.cal-nav{display:flex;align-items:center;justify-content:space-between;gap:8px}.cal-nav button{padding:8px 11px;border-radius:11px}.cal-title{font-weight:800;font-size:14px}.day-view{margin-top:15px;display:none}.day-view.open{display:block;animation:fadeIn .25s ease}.day-view-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.close-day{padding:7px 11px;border-radius:10px}.counter{display:flex;align-items:center;justify-content:center;gap:7px;margin:0 auto 7px}.counter button{width:23px;height:23px;border-radius:8px;font-size:14px;line-height:1}.counter span{min-width:25px;text-align:center;font-weight:800;color:var(--gold2);font-size:12px}.today-prayer .counter{display:none}.day-view .prayer{cursor:default}.day-view .prayer .counter{display:flex}@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
 @media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.today{grid-template-columns:1fr}.hero h2{font-size:35px}}
 @media(max-width:520px){.container{padding:18px 12px 40px}.grid{grid-template-columns:1fr 1fr}.prayers{grid-template-columns:repeat(2,1fr)}.prayer:last-child{grid-column:1/-1}.hero{padding:25px}.plan{grid-template-columns:1fr}}
 </style>
@@ -100,6 +103,8 @@ button{font:inherit;color:var(--text);border:1px solid var(--line);background:rg
 </div>
 </section>
 
+<section class="section"><div class="section-title"><h3>تقويم القضاء</h3><span>من 20/08/2020 إلى 20/08/2026</span></div><div class="panel"><div class="cal-nav"><button id="prevMonth">‹</button><div class="cal-title" id="calTitle"></div><button id="nextMonth">›</button></div><div class="calendar" id="calendar"></div><div class="day-view" id="dayView"><div class="day-view-top"><strong id="selectedDayTitle"></strong><button class="close-day" id="closeDay">إغلاق</button></div><div class="prayers" id="selectedPrayers"></div></div></div></section>
+
 <section class="section">
 <div class="section-title"><h3>السجل</h3><span>آخر الأيام التي سجلتها</span></div>
 <div class="panel"><div class="history" id="history"></div></div>
@@ -112,44 +117,173 @@ const KEY='qadaa-v1';
 let state=JSON.parse(localStorage.getItem(KEY)||'null')||{done:0,days:{},target:5};
 const names=['الفجر','الظهر','العصر','المغرب','العشاء'];
 const icons=['☀','◒','◐','☀','☾'];
-function save(){localStorage.setItem(KEY,JSON.stringify(state));render();}
-function todayKey(){let d=new Date();return d.toISOString().slice(0,10)}
+function todayKey(){return localKey()}
 function fmtDate(k){let d=new Date(k+'T12:00:00');return new Intl.DateTimeFormat('ar-EG',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(d)}
+const T_START_KEY='2026-08-20';
+function localKey(d=new Date()){
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+const T_END_KEY=localKey();
+let calDate=new Date(T_END_KEY+'T12:00:00'),selectedKey=T_END_KEY;
+
+function inRange(k){return k>=T_START_KEY&&k<=T_END_KEY}
+
+function renderCalendar(){
+  const root=document.getElementById('calendar'),y=calDate.getFullYear(),m=calDate.getMonth();
+  document.getElementById('calTitle').textContent=new Intl.DateTimeFormat('ar-EG',{month:'long',year:'numeric'}).format(calDate);
+  let out=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'].map(x=>`<div class="cal-head">${x}</div>`).join('');
+  let first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();
+  for(let i=0;i<first;i++)out+='<div class="cal-day outside"></div>';
+  for(let d=1;d<=days;d++){
+    let k=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,c=dayCounts(k);
+    out+=`<button class="cal-day ${k===selectedKey?'selected':''} ${inRange(k)?'':'outside'}" data-day="${k}">
+      <div class="num">${d}</div>
+      <div class="dots">${c.map(x=>`<i class="dot ${x>0?'done':''}"></i>`).join('')}</div>
+    </button>`;
+  }
+  root.innerHTML=out;
+  root.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>openDay(b.dataset.day));
+}
+
+function renderSelectedDay(){
+  const view=document.getElementById('dayView');
+  if(!view.classList.contains('open'))return;
+  document.getElementById('selectedDayTitle').textContent=fmtDate(selectedKey);
+  const r=document.getElementById('selectedPrayers');
+  r.innerHTML=names.map((n,i)=>prayerCard(n,i,dayCounts(selectedKey),true)).join('');
+  bindPrayerCards(r,selectedKey);
+}
+
+function openDay(k){
+  if(!inRange(k))return;
+  selectedKey=k;
+  document.getElementById('dayView').classList.add('open');
+  renderSelectedDay();
+  renderCalendar();
+}
+
+document.getElementById('prevMonth').onclick=()=>{
+  let n=new Date(calDate);n.setMonth(n.getMonth()-1);
+  if(n>=new Date('2026-08-01T12:00:00')){calDate=n;renderCalendar()}
+};
+document.getElementById('nextMonth').onclick=()=>{
+  let n=new Date(calDate);n.setMonth(n.getMonth()+1);
+  if(n<=new Date(T_END_KEY.slice(0,7)+'-01T12:00:00')){calDate=n;renderCalendar()}
+};
+document.getElementById('closeDay').onclick=()=>document.getElementById('dayView').classList.remove('open');
+
 function render(){
   document.getElementById('total').textContent=TOTAL.toLocaleString('ar-EG');
+  state.done=totalDone();
   document.getElementById('done').textContent=state.done.toLocaleString('ar-EG');
   let rem=Math.max(0,TOTAL-state.done), pct=Math.min(100,state.done/TOTAL*100);
   document.getElementById('remaining').textContent=rem.toLocaleString('ar-EG');
   document.getElementById('remainingText').textContent=rem.toLocaleString('ar-EG')+' صلاة متبقية';
   document.getElementById('progress').style.width=pct+'%';
   document.getElementById('progressText').textContent=pct.toFixed(2)+'% مكتمل';
-  let tk=todayKey(), t=state.days[tk]||[];
+
+  let tk=todayKey();
   document.getElementById('todayDate').textContent=fmtDate(tk);
   document.getElementById('todayLabel').textContent='متابعة القضاء';
-  document.getElementById('prayers').innerHTML=names.map((n,i)=>`
-    <label class="prayer ${t.includes(i)?'done':''}">
-      <input type="checkbox" data-i="${i}" ${t.includes(i)?'checked':''}>
-      <div class="icon">${icons[i]}</div><b>${n}</b><small>قضاء</small>
-      <div class="check">${t.includes(i)?'✓':''}</div>
-    </label>`).join('');
-  document.querySelectorAll('.prayer input').forEach(x=>x.onchange=()=>toggle(+x.dataset.i));
+  document.getElementById('prayers').innerHTML=names.map((n,i)=>prayerCard(n,i,dayCounts(tk),false)).join('');
+  bindTodayPrayerCards(document.getElementById('prayers'),tk);
+
   document.getElementById('dailyTarget').textContent=state.target;
   document.getElementById('targetInput').value=state.target;
-  let days=Object.keys(state.days).filter(k=>state.days[k].length);
+  let days=Object.keys(state.days).filter(k=>dayCounts(k).some(x=>x>0));
   document.getElementById('daysCount').textContent=days.length.toLocaleString('ar-EG');
   document.getElementById('rate').textContent=days.length?(state.done/days.length).toFixed(1):'0';
   let hist=days.sort().reverse().slice(0,10);
-  document.getElementById('history').innerHTML=hist.length?hist.map(k=>`<div class="row"><span>${fmtDate(k)}</span><span class="badge">${state.days[k].length} صلوات ✓</span></div>`).join(''):'<div class="empty">لسه مفيش تسجيلات. ابدأ بأول صلاة النهارده 🤍</div>';
+  document.getElementById('history').innerHTML=hist.length?
+    hist.map(k=>`<div class="row"><span>${fmtDate(k)}</span><span class="badge">${dayCounts(k).reduce((a,b)=>a+b,0)} صلوات ✓</span></div>`).join(''):
+    '<div class="empty">لسه مفيش تسجيلات. ابدأ بأول صلاة النهارده 🤍</div>';
+
+  renderCalendar();
+  renderSelectedDay();
 }
-function toggle(i){
-  let k=todayKey();let a=state.days[k]||[];let has=a.includes(i);
-  if(has){a=a.filter(x=>x!==i);state.done=Math.max(0,state.done-1)}else{a.push(i);state.done++}
-  state.days[k]=a;save();
+
+function dayCounts(k){
+  let v=state.days[k];
+  if(!v)return [0,0,0,0,0];
+  return names.map((_,i)=>Math.max(0,Math.floor(Number(v[i])||0)));
 }
-document.getElementById('completeToday').onclick=()=>{let k=todayKey(),a=state.days[k]||[];state.done+=5-a.length;state.days[k]=[0,1,2,3,4];save()}
-document.getElementById('clearToday').onclick=()=>{let k=todayKey(),a=state.days[k]||[];state.done=Math.max(0,state.done-a.length);delete state.days[k];save()}
-document.getElementById('targetInput').onchange=e=>{state.target=Math.max(1,Math.min(100,+e.target.value||5));save()}
-document.getElementById('resetBtn').onclick=()=>{if(confirm('متأكد إنك عايز تمسح كل التسجيلات؟')){state={done:0,days:{},target:5};save()}}
+
+function totalDone(){
+  return Object.values(state.days).reduce((sum,v)=>
+    sum+names.reduce((a,_,i)=>a+Math.max(0,Math.floor(Number(v[i])||0)),0),0);
+}
+
+function prayerCard(n,i,counts,showCounter=false){
+  let c=Number(counts[i]||0);
+  let counterHtml=showCounter?`<div class="counter">
+      <button type="button" class="minus" data-i="${i}">−</button>
+      <span>${c}</span>
+      <button type="button" class="plus" data-i="${i}">+</button>
+    </div>`:'';
+  return `<div class="prayer ${c>0?'done':''} ${showCounter?'day-prayer':'today-prayer'}" data-prayer="${i}">
+    ${counterHtml}
+    <div class="icon">${icons[i]}</div><b>${n}</b><small>قضاء</small>
+  </div>`;
+}
+
+function setPrayerCount(k,i,value){
+  if(!inRange(k))return;
+  let c=dayCounts(k);
+  c[i]=Math.max(0,Math.floor(Number(value)||0));
+  if(c.every(x=>x===0))delete state.days[k];
+  else state.days[k]=c;
+  save();
+}
+
+function bindPrayerCards(root,k){
+  root.querySelectorAll('.plus').forEach(b=>
+    b.onclick=e=>{e.stopPropagation();setPrayerCount(k,+b.dataset.i,dayCounts(k)[+b.dataset.i]+1)});
+  root.querySelectorAll('.minus').forEach(b=>
+    b.onclick=e=>{e.stopPropagation();setPrayerCount(k,+b.dataset.i,dayCounts(k)[+b.dataset.i]-1)});
+}
+
+function bindTodayPrayerCards(root,k){
+  root.querySelectorAll('.today-prayer').forEach(card=>{
+    card.onclick=()=>togglePrayer(k,+card.dataset.prayer);
+  });
+}
+
+function togglePrayer(k,i){
+  if(!inRange(k))return;
+  let c=dayCounts(k);
+  c[i]=c[i]>0?0:1;
+  if(c.every(x=>x===0))delete state.days[k];
+  else state.days[k]=c;
+  save();
+}
+
+function save(){
+  state.done=totalDone();
+  localStorage.setItem(KEY,JSON.stringify(state));
+  render();
+}
+
+document.getElementById('completeToday').onclick=()=>{
+  let k=todayKey();
+  state.days[k]=[1,1,1,1,1];
+  save();
+};
+document.getElementById('clearToday').onclick=()=>{
+  delete state.days[todayKey()];
+  save();
+};
+document.getElementById('targetInput').onchange=e=>{
+  state.target=Math.max(1,Math.min(100,+e.target.value||5));
+  save();
+};
+document.getElementById('resetBtn').onclick=()=>{
+  if(confirm('متأكد إنك عايز تمسح كل التسجيلات؟')){
+    state={done:0,days:{},target:5};
+    save();
+  }
+};
+
 render();
 </script>
 </body></html>
