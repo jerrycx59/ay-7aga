@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>قضاء — رحلة إتمام الصلوات</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
+:root{
+  --bg:#070b14;--panel:rgba(17,24,39,.72);--panel2:rgba(25,35,56,.72);
+  --text:#eef4ff;--muted:#91a0b8;--gold:#d9b45a;--gold2:#ffe7a2;
+  --green:#43d39e;--red:#ff6b7a;--blue:#6ca8ff;--line:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box} body{margin:0;font-family:Cairo,system-ui;background:
+radial-gradient(circle at 10% 10%,rgba(217,180,90,.12),transparent 30%),
+radial-gradient(circle at 90% 20%,rgba(108,168,255,.10),transparent 28%),var(--bg);
+color:var(--text);min-height:100vh;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.08;background-image:
+linear-gradient(30deg,#fff 12%,transparent 12.5%,transparent 87%,#fff 87.5%,#fff),
+linear-gradient(150deg,#fff 12%,transparent 12.5%,transparent 87%,#fff 87.5%,#fff);
+background-size:44px 76px;mask-image:linear-gradient(to bottom,black,transparent)}
+.container{max-width:1180px;margin:auto;padding:28px 18px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:30px}
+.brand{display:flex;align-items:center;gap:14px}.logo{width:52px;height:52px;border:1px solid rgba(217,180,90,.45);border-radius:18px;
+display:grid;place-items:center;background:linear-gradient(135deg,rgba(217,180,90,.18),rgba(255,255,255,.03));font-size:25px;box-shadow:0 0 35px rgba(217,180,90,.12)}
+.brand h1{font-size:22px;margin:0}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}
+button{font:inherit;color:var(--text);border:1px solid var(--line);background:rgba(255,255,255,.04);cursor:pointer}
+.pill{padding:10px 15px;border-radius:14px}.pill:hover{background:rgba(255,255,255,.08)}
+.hero{position:relative;padding:34px;border:1px solid var(--line);border-radius:30px;background:linear-gradient(145deg,rgba(217,180,90,.12),rgba(17,24,39,.7) 45%,rgba(108,168,255,.08));overflow:hidden}
+.hero:after{content:"☾";position:absolute;left:-15px;bottom:-60px;font-size:260px;color:rgba(217,180,90,.04);transform:rotate(-15deg)}
+.hero h2{font-family:"Playfair Display",serif;font-size:44px;line-height:1.1;margin:0 0 10px}.hero h2 span{color:var(--gold2)}
+.hero p{color:#b5c0d2;max-width:650px;margin:0 0 25px}
+.progress-wrap{height:13px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.progress{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:99px;transition:width .7s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 18px rgba(67,211,158,.25)}
+.progress-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:9px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0}.stat{padding:20px;border:1px solid var(--line);border-radius:22px;background:var(--panel);backdrop-filter:blur(16px)}
+.stat small{color:var(--muted)}.stat strong{display:block;font-size:30px;margin-top:4px}.stat em{font-style:normal;color:var(--gold);font-size:11px}
+.section{margin-top:25px}.section-title{display:flex;align-items:end;justify-content:space-between;margin-bottom:12px}.section-title h3{margin:0;font-size:19px}.section-title span{color:var(--muted);font-size:12px}
+.today{display:grid;grid-template-columns:1.2fr 1fr;gap:15px}.panel{border:1px solid var(--line);border-radius:25px;background:var(--panel);padding:22px;backdrop-filter:blur(16px)}
+.date{font-size:12px;color:var(--muted)}.bigdate{font-size:28px;font-weight:800;margin:4px 0 18px}
+.prayers{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}.prayer{padding:15px 8px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.025);text-align:center;transition:.25s}
+.prayer.done{border-color:rgba(67,211,158,.5);background:rgba(67,211,158,.09);transform:translateY(-3px)}
+.prayer .icon{font-size:21px}.prayer b{display:block;font-size:13px;margin:5px 0}.prayer small{color:var(--muted);font-size:9px}
+.prayer input{display:none}.check{width:22px;height:22px;margin:auto;border-radius:50%;border:1px solid #536078;display:grid;place-items:center;font-size:12px}
+.done .check{background:var(--green);border-color:var(--green);color:#06110d}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}.primary{background:linear-gradient(135deg,#d9b45a,#a98132);color:#111;border:0;font-weight:800;padding:11px 16px;border-radius:14px}
+.danger{color:#ff9aa5}
+.plan{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{padding:15px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.025)}
+.field label{display:block;color:var(--muted);font-size:11px}.field strong{font-size:22px}.field input{width:100%;margin-top:8px;background:#0b111d;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px;font:inherit}
+.quote{font-family:"Playfair Display",serif;font-size:18px;line-height:1.7;color:#e9d9a8;text-align:center;padding:12px}
+.history{display:flex;flex-direction:column;gap:9px}.row{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025)}
+.badge{padding:4px 9px;border-radius:99px;background:rgba(67,211,158,.1);color:var(--green);font-size:10px}
+.empty{color:var(--muted);text-align:center;padding:30px}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.today{grid-template-columns:1fr}.hero h2{font-size:35px}}
+@media(max-width:520px){.container{padding:18px 12px 40px}.grid{grid-template-columns:1fr 1fr}.prayers{grid-template-columns:repeat(2,1fr)}.prayer:last-child{grid-column:1/-1}.hero{padding:25px}.plan{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="brand"><div class="logo">☾</div><div><h1>قضاء</h1><p>خطوة بخطوة… لحد ما تكمّل اللي عليك.</p></div></div>
+  <button class="pill" id="resetBtn">إعادة ضبط البيانات</button>
+</header>
+
+<section class="hero">
+  <h2>رحلتك إلى <span>إتمام القضاء</span></h2>
+  <p>متابعة بسيطة وهادية للصلوات الفائتة. سجّل إنجازك كل يوم، وشوف تقدمك قدام عينك.</p>
+  <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+  <div class="progress-meta"><span id="progressText">0% مكتمل</span><span id="remainingText">10,955 صلاة متبقية</span></div>
+</section>
+
+<div class="grid">
+  <div class="stat"><small>إجمالي القضاء</small><strong id="total">10,955</strong><em>صلاة</em></div>
+  <div class="stat"><small>تم قضاؤه</small><strong id="done">0</strong><em>صلاة</em></div>
+  <div class="stat"><small>المتبقي</small><strong id="remaining">10,955</strong><em>صلاة</em></div>
+  <div class="stat"><small>البداية</small><strong style="font-size:20px">20/08/2026</strong><em>بداية المتابعة</em></div>
+</div>
+
+<section class="section">
+<div class="section-title"><h3>اليوم</h3><span id="todayLabel"></span></div>
+<div class="today">
+  <div class="panel">
+    <div class="date">تسجيل صلوات القضاء لليوم</div>
+    <div class="bigdate" id="todayDate"></div>
+    <div class="prayers" id="prayers"></div>
+    <div class="actions">
+      <button class="primary" id="completeToday">تسجيل الكل ✓</button>
+      <button class="pill" id="clearToday">إلغاء اليوم</button>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="quote">"أحب الأعمال إلى الله أدومها وإن قل."</div>
+    <div class="plan">
+      <div class="field"><label>قضاء مستهدف يوميًا</label><strong id="dailyTarget">5</strong><input id="targetInput" type="number" min="1" max="100" value="5"></div>
+      <div class="field"><label>أيام المتابعة</label><strong id="daysCount">0</strong><em> يوم</em></div>
+      <div class="field"><label>معدل الإنجاز</label><strong id="rate">0</strong><em> صلاة/يوم</em></div>
+      <div class="field"><label>تاريخ البداية</label><strong style="font-size:18px">20/08/2026</strong></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<section class="section">
+<div class="section-title"><h3>السجل</h3><span>آخر الأيام التي سجلتها</span></div>
+<div class="panel"><div class="history" id="history"></div></div>
+</section>
+</div>
+
+<script>
+const TOTAL=10955;
+const KEY='qadaa-v1';
+let state=JSON.parse(localStorage.getItem(KEY)||'null')||{done:0,days:{},target:5};
+const names=['الفجر','الظهر','العصر','المغرب','العشاء'];
+const icons=['☀','◒','◐','☀','☾'];
+function save(){localStorage.setItem(KEY,JSON.stringify(state));render();}
+function todayKey(){let d=new Date();return d.toISOString().slice(0,10)}
+function fmtDate(k){let d=new Date(k+'T12:00:00');return new Intl.DateTimeFormat('ar-EG',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(d)}
+function render(){
+  document.getElementById('total').textContent=TOTAL.toLocaleString('ar-EG');
+  document.getElementById('done').textContent=state.done.toLocaleString('ar-EG');
+  let rem=Math.max(0,TOTAL-state.done), pct=Math.min(100,state.done/TOTAL*100);
+  document.getElementById('remaining').textContent=rem.toLocaleString('ar-EG');
+  document.getElementById('remainingText').textContent=rem.toLocaleString('ar-EG')+' صلاة متبقية';
+  document.getElementById('progress').style.width=pct+'%';
+  document.getElementById('progressText').textContent=pct.toFixed(2)+'% مكتمل';
+  let tk=todayKey(), t=state.days[tk]||[];
+  document.getElementById('todayDate').textContent=fmtDate(tk);
+  document.getElementById('todayLabel').textContent='متابعة القضاء';
+  document.getElementById('prayers').innerHTML=names.map((n,i)=>`
+    <label class="prayer ${t.includes(i)?'done':''}">
+      <input type="checkbox" data-i="${i}" ${t.includes(i)?'checked':''}>
+      <div class="icon">${icons[i]}</div><b>${n}</b><small>قضاء</small>
+      <div class="check">${t.includes(i)?'✓':''}</div>
+    </label>`).join('');
+  document.querySelectorAll('.prayer input').forEach(x=>x.onchange=()=>toggle(+x.dataset.i));
+  document.getElementById('dailyTarget').textContent=state.target;
+  document.getElementById('targetInput').value=state.target;
+  let days=Object.keys(state.days).filter(k=>state.days[k].length);
+  document.getElementById('daysCount').textContent=days.length.toLocaleString('ar-EG');
+  document.getElementById('rate').textContent=days.length?(state.done/days.length).toFixed(1):'0';
+  let hist=days.sort().reverse().slice(0,10);
+  document.getElementById('history').innerHTML=hist.length?hist.map(k=>`<div class="row"><span>${fmtDate(k)}</span><span class="badge">${state.days[k].length} صلوات ✓</span></div>`).join(''):'<div class="empty">لسه مفيش تسجيلات. ابدأ بأول صلاة النهارده 🤍</div>';
+}
+function toggle(i){
+  let k=todayKey();let a=state.days[k]||[];let has=a.includes(i);
+  if(has){a=a.filter(x=>x!==i);state.done=Math.max(0,state.done-1)}else{a.push(i);state.done++}
+  state.days[k]=a;save();
+}
+document.getElementById('completeToday').onclick=()=>{let k=todayKey(),a=state.days[k]||[];state.done+=5-a.length;state.days[k]=[0,1,2,3,4];save()}
+document.getElementById('clearToday').onclick=()=>{let k=todayKey(),a=state.days[k]||[];state.done=Math.max(0,state.done-a.length);delete state.days[k];save()}
+document.getElementById('targetInput').onchange=e=>{state.target=Math.max(1,Math.min(100,+e.target.value||5));save()}
+document.getElementById('resetBtn').onclick=()=>{if(confirm('متأكد إنك عايز تمسح كل التسجيلات؟')){state={done:0,days:{},target:5};save()}}
+render();
+</script>
+</body></html>
